@@ -1624,7 +1624,11 @@ a{ color:var(--brand-primary); }
 }
 .nav-inner{ display:flex; align-items:center; gap:1rem; min-height:var(--nav-h); }
 .brand{ display:flex; align-items:center; gap:.55rem; text-decoration:none; color:inherit; flex:0 0 auto; }
-.brand img{ height:34px; width:auto; border-radius:8px; }
+/* Logo slot. fitLogo() measures the uploaded image's non-transparent area and
+   zooms it to fill this box, so a logo with lots of empty padding still reads
+   at full size. Falls back to a plain 34px fit if measuring is not possible. */
+.brand .logobox{ height:34px; width:34px; position:relative; overflow:hidden; flex:0 0 auto; display:block; }
+.brand .logobox img{ position:absolute; left:0; top:0; height:34px; width:auto; max-width:none; }
 .wordmark{ font-weight:800; font-size:1.3rem; letter-spacing:-.035em; color:var(--brand-primary); }
 .wordmark span{ color:var(--brand-accent); }
 .nav-mid{ flex:1 1 auto; display:flex; justify-content:center; min-width:0; }
@@ -2085,7 +2089,8 @@ details.faq p{ margin:.6rem 0 0; font-size:.88rem; color:var(--brand-muted); }
       <!-- LOGO SLOT — your upload always wins.
            Order tried: assets/logo.png  ->  assets/logo.svg  ->  text wordmark.
            To use your own: drop ANY image named logo.png into /assets. Nothing else to change. -->
-      <img src="assets/logo.png" alt="Folosure logo" onerror="logoFallback(this)">
+      <span class="logobox" id="logoBox"><img src="assets/logo.png" alt="Folosure logo"
+            onload="fitLogo(this)" onerror="logoFallback(this)"></span>
       <span class="wordmark">Folo<span>sure</span></span>
     </a>
 
@@ -2264,7 +2269,59 @@ function countUp(elm, to, fmt, ms){
    Drop ANY image named logo.png into /assets and it takes over — no code change. */
 function logoFallback(img){
   if (img.dataset.step !== 'svg'){ img.dataset.step = 'svg'; img.src = 'assets/logo.svg'; }
-  else { img.remove(); }
+  else { const box = img.closest('.logobox'); (box || img).remove(); }
+}
+
+/* Auto-fit the logo.
+   Many exported logos sit on a big transparent canvas — the supplied file is
+   70% empty space, so a plain 34px fit renders the mark at ~13px. This finds
+   the actual non-transparent bounds and scales that region to fill the slot.
+   The source file is never modified; this is display-only. */
+const LOGO_BOX = 34, LOGO_PAD = 2;
+function fitLogo(img){
+  const box = img.closest('.logobox');
+  if (!box || !img.naturalWidth) return;
+  let b = null;
+  try {
+    const SCAN = 200;
+    const sw = Math.max(1, Math.min(SCAN, img.naturalWidth));
+    const sh = Math.max(1, Math.round(sw * img.naturalHeight / img.naturalWidth));
+    const c = document.createElement('canvas');
+    c.width = sw; c.height = sh;
+    const ctx = c.getContext('2d', { willReadFrequently:true });
+    ctx.drawImage(img, 0, 0, sw, sh);
+    const d = ctx.getImageData(0, 0, sw, sh).data;
+    let x0=sw, y0=sh, x1=-1, y1=-1;
+    for (let y=0; y<sh; y++){
+      for (let x=0; x<sw; x++){
+        if (d[(y*sw+x)*4+3] > 12){
+          if (x<x0) x0=x; if (x>x1) x1=x;
+          if (y<y0) y0=y; if (y>y1) y1=y;
+        }
+      }
+    }
+    if (x1 >= x0 && y1 >= y0)
+      b = { x:x0/sw, y:y0/sh, w:(x1-x0+1)/sw, h:(y1-y0+1)/sh };
+  } catch(e){ b = null; }              // tainted canvas (file:// in some browsers)
+
+  // no usable alpha, or the art already fills the canvas -> plain fit
+  if (!b || (b.w > 0.92 && b.h > 0.92)){
+    const ar = img.naturalWidth / img.naturalHeight;
+    box.style.width  = Math.round(LOGO_BOX * ar) + 'px';
+    img.style.height = LOGO_BOX + 'px';
+    img.style.left = '0px'; img.style.top = '0px';
+    return;
+  }
+
+  const ar     = img.naturalWidth / img.naturalHeight;
+  const target = LOGO_BOX - LOGO_PAD;
+  const h      = target / Math.max(b.h, b.w * ar);   // render height so the mark fits
+  const w      = h * ar;
+  const markW  = b.w * w, markH = b.h * h;
+  box.style.width  = Math.ceil(markW) + 'px';
+  img.style.height = h + 'px';
+  img.style.left   = (-b.x * w) + 'px';
+  img.style.top    = (-b.y * h + (LOGO_BOX - markH) / 2) + 'px';
 }
 
 /* =============== SCREENSHOTS (graceful placeholders) ===============
