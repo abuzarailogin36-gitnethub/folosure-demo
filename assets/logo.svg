@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="88" y1="6" x2="10" y2="94">
+      <stop offset="0"    stop-color="#00D9FF"/>
+      <stop offset="0.40" stop-color="#1FB4FF"/>
+      <stop offset="0.68" stop-color="#5A7BFF"/>
+      <stop offset="1"    stop-color="#9147FF"/>
+    </linearGradient>
+  </defs>
+  <g fill="url(#g)">
+    <path d="M91,4.2 L84.2,20.6 H10.4 C10.4,11.6 13.6,6.2 20,4.2 Z"/>
+    <path d="M85,25.6 L77.8,41.9 H6.6 C6.6,32.8 9.6,27.4 15.6,25.6 Z"/>
+    <path d="M53.5,46.2 C41.5,56.4 24,58.2 5.3,58.2 C5.3,49.4 8.1,46.2 14,46.2 Z"/>
+    <path d="M31,62.6 C23.2,70.9 14.2,74.6 4.4,74.6 C4.4,65.6 6.8,62.6 12,62.6 Z"/>
+    <!-- clean tail wedge to the bottom point -->
+    <path d="M4.4,74.6 L4.3,94.2 L15.2,83.6 Z"/>
+    <!-- node line, aligned so the small dot sits exactly on it -->
+    <path d="M8.26,80.14 L62.06,50.94 L64.74,55.86 L10.94,85.06 Z"/>
+    <circle cx="63.4" cy="53.4" r="6.4"/>
+    <circle cx="29.6" cy="71.6" r="5.4"/>
+  </g>
+</svg>

@@ -2082,8 +2082,10 @@ details.faq p{ margin:.6rem 0 0; font-size:.88rem; color:var(--brand-muted); }
 <header class="nav">
   <div class="wrap nav-inner">
     <a class="brand" href="#" onclick="go('problem');return false;" aria-label="Folosure home">
-      <!-- Drop assets/logo.png in and it replaces the wordmark automatically -->
-      <img src="assets/logo.png" alt="Folosure logo" onerror="this.remove()">
+      <!-- LOGO SLOT — your upload always wins.
+           Order tried: assets/logo.png  ->  assets/logo.svg  ->  text wordmark.
+           To use your own: drop ANY image named logo.png into /assets. Nothing else to change. -->
+      <img src="assets/logo.png" alt="Folosure logo" onerror="logoFallback(this)">
       <span class="wordmark">Folo<span>sure</span></span>
     </a>
 
@@ -2254,6 +2256,15 @@ function countUp(elm, to, fmt, ms){
     else elm._countVal = to;
   }
   requestAnimationFrame(frame);
+}
+
+/* =============== LOGO SLOT ===============
+   Tries assets/logo.png first (your upload), then assets/logo.svg (the
+   built-in vector mark), then gives up and leaves the text wordmark.
+   Drop ANY image named logo.png into /assets and it takes over — no code change. */
+function logoFallback(img){
+  if (img.dataset.step !== 'svg'){ img.dataset.step = 'svg'; img.src = 'assets/logo.svg'; }
+  else { img.remove(); }
 }
 
 /* =============== SCREENSHOTS (graceful placeholders) ===============
