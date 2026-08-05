@@ -181,7 +181,7 @@ const VERTICALS = {
   label:'Auto Repair Shop', short:'shop', icon:'🔧',
   bizName:'Westside Auto Care',
   /* per-vertical palette — see USE_VERTICAL_THEMES below to switch these off */
-  theme:{ name:'Steel & Safety Orange', primary:'#1E3A8A', primaryDark:'#152C6B', accent:'#C2410C', bg:'#F4F6FC' },
+  theme:{ name:'Steel & Safety Orange', primary:'#1E3A8A', primaryDark:'#152C6B', accent:'#C2410C', bg:'#F4F6FC' , fontHead:'"Arial Black", "Helvetica Neue", Impact, sans-serif', fontBody:'"Helvetica Neue", Arial, sans-serif' },
   reputation:{ rating:4.8, reviews:214, newThisMonth:19 },
   customerWord:'customer', jobWord:'service',
   avgTicket: 245, visitsPerYear: 1.8, activeCustomers: 1400,
@@ -400,7 +400,7 @@ const VERTICALS = {
 'real-estate': {
   label:'Real Estate Broker', short:'brokerage', icon:'🏡',
   bizName:'Carter & Co. Realty',
-  theme:{ name:'Navy & Brass', primary:'#14304F', primaryDark:'#0D2135', accent:'#8A6516', bg:'#F8F7F3' },
+  theme:{ name:'Navy & Brass', primary:'#14304F', primaryDark:'#0D2135', accent:'#8A6516', bg:'#F8F7F3' , fontHead:'Georgia, "Times New Roman", Times, serif', fontBody:'"Helvetica Neue", Arial, sans-serif' },
   reputation:{ rating:4.9, reviews:96, newThisMonth:11 },
   customerWord:'client', jobWord:'closing',
   avgTicket: 8400, visitsPerYear: .3, activeCustomers: 640,
@@ -618,7 +618,7 @@ const VERTICALS = {
 'retail': {
   label:'Gift & Candy Shop', short:'shop', icon:'🍬',
   bizName:'Sugar & Twine',
-  theme:{ name:'Berry & Caramel', primary:'#9D174D', primaryDark:'#7A1039', accent:'#B45309', bg:'#FDF4F7' },
+  theme:{ name:'Berry & Caramel', primary:'#9D174D', primaryDark:'#7A1039', accent:'#B45309', bg:'#FDF4F7' , fontHead:'"Trebuchet MS", "Segoe UI", Tahoma, sans-serif', fontBody:'"Trebuchet MS", Verdana, sans-serif' },
   reputation:{ rating:4.9, reviews:341, newThisMonth:27 },
   customerWord:'customer', jobWord:'visit',
   avgTicket: 38, visitsPerYear: 4.5, activeCustomers: 2200,
@@ -832,7 +832,7 @@ const VERTICALS = {
 'dental': {
   label:'Dental / Medical Practice', short:'practice', icon:'🦷',
   bizName:'Riverside Family Dental',
-  theme:{ name:'Clinical Teal & Coral', primary:'#0E7490', primaryDark:'#0A5872', accent:'#BE3A22', bg:'#F1F9FB' },
+  theme:{ name:'Clinical Teal & Coral', primary:'#0E7490', primaryDark:'#0A5872', accent:'#BE3A22', bg:'#F1F9FB' , fontHead:'Verdana, Geneva, Tahoma, sans-serif', fontBody:'Verdana, Geneva, sans-serif' },
   reputation:{ rating:4.9, reviews:452, newThisMonth:34 },
   customerWord:'patient', jobWord:'appointment',
   avgTicket: 245, visitsPerYear: 1.9, activeCustomers: 1800,
@@ -1050,7 +1050,7 @@ const VERTICALS = {
 'hvac': {
   label:'HVAC / Home Services', short:'company', icon:'❄️',
   bizName:'Northline Heating & Air',
-  theme:{ name:'Cool Blue & Heat Orange', primary:'#075985', primaryDark:'#053F5E', accent:'#C2410C', bg:'#F2F8FC' },
+  theme:{ name:'Cool Blue & Heat Orange', primary:'#075985', primaryDark:'#053F5E', accent:'#C2410C', bg:'#F2F8FC' , fontHead:'"Arial Narrow", "Helvetica Neue", Arial, sans-serif', fontBody:'Arial, "Helvetica Neue", sans-serif' },
   reputation:{ rating:4.7, reviews:288, newThisMonth:22 },
   customerWord:'customer', jobWord:'job',
   avgTicket: 320, visitsPerYear: 1.6, activeCustomers: 1100,
@@ -1270,7 +1270,7 @@ const VERTICALS = {
 'salon': {
   label:'Salon / Barbershop / Med Spa', short:'salon', icon:'💈',
   bizName:'Vine & Vale Salon',
-  theme:{ name:'Plum & Rose', primary:'#6B21A8', primaryDark:'#4F1580', accent:'#BE185D', bg:'#FAF5FD' },
+  theme:{ name:'Plum & Rose', primary:'#6B21A8', primaryDark:'#4F1580', accent:'#BE185D', bg:'#FAF5FD' , fontHead:'"Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif', fontBody:'"Helvetica Neue", Arial, sans-serif' },
   reputation:{ rating:4.9, reviews:376, newThisMonth:41 },
   customerWord:'client', jobWord:'appointment',
   avgTicket: 72, visitsPerYear: 7, activeCustomers: 950,
@@ -1623,6 +1623,9 @@ body{
 }
 img{ max-width:100%; display:block; }
 button{ font:inherit; color:inherit; cursor:pointer; }
+h1,h2,h3,h4,.wordmark,.stat-value,.roi-big,.price-amt,.race-clock,.coupon-val{
+  font-family:var(--brand-font-head, var(--brand-font));
+}
 h1,h2,h3,h4{ margin:0 0 .4em; line-height:1.15; letter-spacing:-.02em; }
 h1{ font-size:clamp(1.75rem,4.2vw,3rem); font-weight:800; }
 h2{ font-size:clamp(1.4rem,3vw,2.1rem); font-weight:800; }
@@ -2072,6 +2075,16 @@ details.faq p{ margin:.6rem 0 0; font-size:.88rem; color:var(--brand-muted); }
 .footer a{ color:var(--on-brand); }
 .footer .wordmark{ color:var(--on-brand); }
 
+/* business artwork */
+.hero-grid{ display:grid; grid-template-columns:minmax(0,1.25fr) minmax(260px,.95fr); gap:1.6rem; align-items:center; }
+@media (max-width:860px){ .hero-grid{ grid-template-columns:1fr; } }
+.hero-art{ background:var(--brand-surface); border:1px solid var(--brand-border);
+  border-radius:var(--radius-lg); padding:1rem 1rem .6rem; box-shadow:var(--shadow-md); }
+.bizart{ width:100%; height:auto; display:block; }
+.hero-art-cap{ text-align:center; font-size:.72rem; color:var(--brand-muted); font-weight:650;
+  margin-top:.4rem; padding-top:.5rem; border-top:1px solid var(--brand-border); }
+.bizart-sm{ width:100%; height:auto; display:block; }
+
 /* business identity bar (dashboard) */
 .bizbar{ display:flex; align-items:center; gap:.85rem; flex-wrap:wrap;
   background:var(--brand-surface); border:1px solid var(--brand-border);
@@ -2487,6 +2500,8 @@ function applyTheme(){
   set('--brand-primary-dark', t && t.primaryDark);
   set('--brand-accent',       t && t.accent);
   set('--brand-bg',           t && t.bg);
+  set('--brand-font-head',    t && t.fontHead);
+  set('--brand-font',         t && t.fontBody);
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', (t && t.primary) || '#2743C4');
 }
@@ -2523,14 +2538,118 @@ function onTabEnter(id){
   if (id === 'roi') recalcROI();
 }
 
+/* =============== BUSINESS ARTWORK ===============
+   Hand-drawn inline SVG per vertical. Everything is painted with the brand
+   variables, so each scene re-colours itself with the vertical's palette.
+   Inline on purpose: the demo has to work with no internet. */
+const BIZ_ART = {
+'auto-repair': `
+  <circle cx="212" cy="42" r="26" fill="var(--tint-accent)"/>
+  <path d="M36 124 q0-31 27-34 l45-4 q19-1 31 12 l21 22 q16 2 20 8 q4 6 4 14 h-148z" fill="var(--brand-primary)"/>
+  <path d="M67 93 l9-20 q2-5 8-5 h27 v25z" fill="var(--brand-surface)" opacity=".92"/>
+  <path d="M118 93 v-25 h15 q6 0 10 5 l15 20z" fill="var(--brand-surface)" opacity=".92"/>
+  <rect x="150" y="107" width="17" height="9" rx="4" fill="var(--brand-accent)"/>
+  <circle cx="73" cy="141" r="18" fill="var(--brand-ink)"/><circle cx="73" cy="141" r="7" fill="var(--brand-surface)"/>
+  <circle cx="142" cy="141" r="18" fill="var(--brand-ink)"/><circle cx="142" cy="141" r="7" fill="var(--brand-surface)"/>
+  <g transform="translate(212,42)" fill="var(--brand-accent)">
+    <circle r="19" fill="none" stroke="var(--brand-accent)" stroke-width="8"/><circle r="6"/>
+    <rect x="-3.5" y="-30" width="7" height="10" rx="2"/><rect x="-3.5" y="20" width="7" height="10" rx="2"/>
+    <rect x="-30" y="-3.5" width="10" height="7" rx="2"/><rect x="20" y="-3.5" width="10" height="7" rx="2"/>
+  </g>`,
+
+'real-estate': `
+  <path d="M54 84 L118 38 L182 84 Z" fill="var(--brand-primary)"/>
+  <rect x="70" y="84" width="96" height="58" fill="var(--tint-primary2)" stroke="var(--brand-primary)" stroke-width="3"/>
+  <rect x="105" y="106" width="26" height="36" rx="2" fill="var(--brand-primary)"/>
+  <rect x="82" y="96" width="17" height="17" fill="var(--brand-surface)" stroke="var(--brand-primary)" stroke-width="2"/>
+  <rect x="138" y="96" width="17" height="17" fill="var(--brand-surface)" stroke="var(--brand-primary)" stroke-width="2"/>
+  <rect x="204" y="92" width="6" height="50" rx="3" fill="var(--brand-muted)"/>
+  <rect x="180" y="72" width="54" height="26" rx="5" fill="var(--brand-accent)"/>
+  <text x="207" y="90" text-anchor="middle" font-size="13" font-weight="800"
+        font-family="var(--brand-font-head)" fill="var(--brand-surface)">SOLD</text>`,
+
+'retail': `
+  <rect x="74" y="78" width="92" height="64" rx="7" fill="var(--brand-primary)"/>
+  <rect x="66" y="62" width="108" height="21" rx="7" fill="var(--brand-primary-dark)"/>
+  <rect x="111" y="62" width="18" height="80" fill="var(--brand-accent)"/>
+  <circle cx="108" cy="58" r="12" fill="var(--brand-accent)"/>
+  <circle cx="132" cy="58" r="12" fill="var(--brand-accent)"/>
+  <g transform="translate(208,108)">
+    <circle r="15" fill="var(--brand-accent)"/>
+    <path d="M-15 0 l-13 -9 v18z" fill="var(--brand-accent)"/>
+    <path d="M15 0 l13 -9 v18z" fill="var(--brand-accent)"/>
+  </g>
+  <g transform="translate(44,116)">
+    <circle r="13" fill="var(--brand-primary)" opacity=".85"/>
+    <path d="M-13 0 l-11 -8 v16z" fill="var(--brand-primary)" opacity=".85"/>
+    <path d="M13 0 l11 -8 v16z" fill="var(--brand-primary)" opacity=".85"/>
+  </g>`,
+
+'dental': `
+  <path d="M96 48 q26-16 52 0 q19 12 12 46 q-5 26-14 46 q-7 16-16 2 l-7-27 q-2-9-7 0 l-7 27 q-9 14-16-2 q-9-20-14-46 q-7-34 12-46z"
+        fill="var(--brand-surface)" stroke="var(--brand-primary)" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M112 68 q10-7 20-3" stroke="var(--brand-primary)" stroke-width="4" fill="none" stroke-linecap="round" opacity=".4"/>
+  <g fill="var(--brand-accent)">
+    <path d="M196 44 l5 13 13 5 -13 5 -5 13 -5-13 -13-5 13-5z"/>
+    <path d="M52 74 l4 10 10 4 -10 4 -4 10 -4-10 -10-4 10-4z"/>
+    <path d="M180 108 l3 8 8 3 -8 3 -3 8 -3-8 -8-3 8-3z"/>
+  </g>`,
+
+'hvac': `
+  <circle cx="36" cy="44" r="16" fill="var(--brand-accent)"/>
+  <g stroke="var(--brand-accent)" stroke-width="4" stroke-linecap="round">
+    <line x1="36" y1="16" x2="36" y2="6"/><line x1="36" y1="82" x2="36" y2="72"/>
+    <line x1="8" y1="44" x2="18" y2="44"/><line x1="64" y1="44" x2="54" y2="44"/>
+  </g>
+  <rect x="66" y="52" width="124" height="58" rx="11" fill="var(--brand-surface)" stroke="var(--brand-primary)" stroke-width="4"/>
+  <rect x="78" y="84" width="100" height="7" rx="3.5" fill="var(--brand-primary)" opacity=".3"/>
+  <rect x="78" y="96" width="100" height="7" rx="3.5" fill="var(--brand-primary)" opacity=".3"/>
+  <circle cx="170" cy="66" r="5" fill="var(--brand-accent)"/>
+  <g stroke="var(--brand-primary)" stroke-width="4" fill="none" stroke-linecap="round" opacity=".55">
+    <path d="M92 118 q7 11 0 22"/><path d="M124 118 q7 11 0 22"/><path d="M156 118 q7 11 0 22"/>
+  </g>
+  <g transform="translate(222,50)" stroke="var(--brand-primary)" stroke-width="4" stroke-linecap="round">
+    <line x1="0" y1="-17" x2="0" y2="17"/><line x1="-15" y1="-9" x2="15" y2="9"/><line x1="-15" y1="9" x2="15" y2="-9"/>
+  </g>`,
+
+'salon': `
+  <ellipse cx="66" cy="70" rx="31" ry="40" fill="var(--tint-primary2)" stroke="var(--brand-primary)" stroke-width="4"/>
+  <ellipse cx="66" cy="70" rx="18" ry="26" fill="var(--brand-surface)" opacity=".55"/>
+  <rect x="126" y="66" width="64" height="50" rx="11" fill="var(--brand-primary)"/>
+  <rect x="134" y="52" width="48" height="20" rx="9" fill="var(--brand-primary-dark)"/>
+  <rect x="148" y="116" width="20" height="22" fill="var(--brand-primary-dark)"/>
+  <rect x="128" y="136" width="60" height="8" rx="4" fill="var(--brand-primary-dark)"/>
+  <g transform="translate(222,58)" stroke="var(--brand-accent)" stroke-width="5" fill="none" stroke-linecap="round">
+    <line x1="-13" y1="-22" x2="11" y2="18"/><line x1="13" y1="-22" x2="-11" y2="18"/>
+    <circle cx="-13" cy="26" r="8"/><circle cx="13" cy="26" r="8"/>
+  </g>`
+};
+
+function bizArt(cls){
+  const art = BIZ_ART[STATE.slug];
+  if (!art) return '';
+  return `<svg class="${cls || 'bizart'}" viewBox="0 0 260 160" role="img"
+     aria-label="Illustration representing a ${esc(V().label.toLowerCase())}">
+     <rect x="0" y="146" width="260" height="5" rx="2.5" fill="var(--brand-border)"/>
+     ${art}</svg>`;
+}
+
 /* =============== TAB 1 — THE PROBLEM =============== */
 function renderProblem(){
   const v = V(), d = derived(v);
   $('panel-problem').innerHTML = `
   <div class="wrap section">
-    <div class="eyebrow">The problem</div>
-    <h1>Your best ${v.customerWord}s aren’t gone.<br>They’re just not being reminded.</h1>
-    <p class="lead">You already paid to get them the first time. They bought, they liked you, and then nothing happened — because nobody followed up.</p>
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">The problem · ${esc(v.label)}</div>
+        <h1>Your best ${v.customerWord}s aren’t gone.<br>They’re just not being reminded.</h1>
+        <p class="lead">You already paid to get them the first time. They bought, they liked you, and then nothing happened — because nobody followed up.</p>
+      </div>
+      <div class="hero-art">
+        ${bizArt()}
+        <div class="hero-art-cap">${esc(v.bizName)} · sample business</div>
+      </div>
+    </div>
 
     <div class="bucket-wrap" style="margin-top:1.8rem">
       <div>${bucketSVG()}</div>
