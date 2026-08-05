@@ -1516,6 +1516,36 @@ const SCREENSHOTS = [
 </script>
 
 <!-- ============================================================
+     3b. LEAD CAPTURE  —  where trial requests are sent
+     ============================================================ -->
+<script>
+/* Paste the Inbound Webhook URL from your CRM workflow between the quotes.
+   While this is empty the form still works and logs to the console, so the
+   demo never looks broken.
+
+   SECURITY: only ever put a WEBHOOK URL here. Never an API key, access token
+   or private integration secret — this file is served publicly, so anything
+   in it can be read by anyone who opens the page. A webhook URL only lets
+   someone send you data; a key would let them read and change your account. */
+const LEAD_CAPTURE = {
+  webhookUrl: '',                    // <-- paste the Inbound Webhook URL here
+  timeoutMs: 8000
+};
+
+/* ===== YOUR CONTACT DETAILS — EDIT THIS BLOCK =====
+   Used in the footer and on the Get Started tab. Anything left empty is
+   simply hidden, so partial details never leave a dangling label. */
+const CONTACT = {
+  repName: 'Mir Ali',
+  company: 'Folosure',
+  phone:   '972-372-4805',
+  email:   'info@newdoorinvestments.net',
+  address: '2609 Technology Dr, Ste 157, Plano, TX 75074',
+  website: 'folosure.com'
+};
+</script>
+
+<!-- ============================================================
      4. PRICING DATA
      Three tiers. Middle tier is highlighted. Annual = 2 months free.
      Reasoning for these numbers is documented in README.md.
@@ -2188,11 +2218,8 @@ body, .nav, .tabbar, .card, .stat, .node, .price-card, .wf-card, .btn{
         <div class="wordmark" style="font-size:1.15rem">Folo<span style="color:var(--brand-accent)">sure</span></div>
         <p style="margin:.3rem 0 0">Your customers come back. Automatically.</p>
       </div>
-      <div style="font-size:.82rem;line-height:1.9">
-        <!-- CONTACT PLACEHOLDER — replace with real details -->
-        <div><strong style="color:var(--on-brand)">Folosure</strong></div>
-        <div>hello@folosure.com · (555) 010-0100</div>
-        <div><a href="https://folosure.com">folosure.com</a></div>
+      <div style="font-size:.82rem;line-height:1.9" id="footerContact">
+        <!-- rendered from the CONTACT block near the top of this file -->
       </div>
     </div>
     <hr class="divider" style="background:rgba(255,255,255,.15);margin:1.4rem 0">
@@ -4011,6 +4038,10 @@ function renderStart(){
           <div class="full"><label for="fType">Business type</label>
             <select id="fType">${VERTICAL_ORDER.map(k => `<option value="${k}"${k === STATE.slug ? ' selected' : ''}>${VERTICALS[k].label}</option>`).join('')}<option value="other">Something else</option></select>
           </div>
+          <div class="sr-only" aria-hidden="true">
+            <label for="fWebsite">Leave this field empty</label>
+            <input id="fWebsite" name="website" tabindex="-1" autocomplete="off">
+          </div>
           <div class="full"><button class="btn btn-accent btn-lg" type="submit" style="width:100%">Start my 14-day free trial</button></div>
           <div class="full center muted" style="font-size:.75rem">No credit card. Cancel any time. We never sell your data.</div>
         </form>
@@ -4030,25 +4061,85 @@ function renderStart(){
           <p style="font-size:.88rem;margin-bottom:.6rem">Go back and run your own numbers. It takes about a minute.</p>
           <button class="btn btn-ghost btn-sm" onclick="go('roi')">Open the ROI calculator</button>
         </div>
+        ${(CONTACT.phone || CONTACT.email) ? `
+        <div class="card" style="margin-top:.9rem">
+          <h3 style="font-size:1.05rem">Rather just talk?</h3>
+          <p class="muted" style="font-size:.85rem;margin-bottom:.7rem">Skip the form. ${CONTACT.repName ? esc(CONTACT.repName) + ' will pick up.' : 'We will pick up.'}</p>
+          <div class="row">
+            ${CONTACT.phone ? `<a class="btn btn-primary btn-sm" href="tel:${esc(CONTACT.phone.replace(/[^\d+]/g,''))}">📞 ${esc(CONTACT.phone)}</a>` : ''}
+            ${CONTACT.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(CONTACT.email)}?subject=Folosure%20trial">✉️ Email us</a>` : ''}
+          </div>
+        </div>` : ''}
         <!-- BOOKING CALENDAR EMBED CAN ALSO GO HERE -->
       </div>
     </div>
   </div>`;
 }
 
-function submitLead(e){
+async function submitLead(e){
   e.preventDefault();
+
+  // honeypot: real people never fill a hidden field, bots fill everything
+  const trap = $('fWebsite');
+  if (trap && trap.value){ console.warn('[Folosure] spam blocked'); return; }
+
   const payload = {
-    name:  $('fName').value,
-    business: $('fBiz').value,
-    phone: $('fPhone').value,
-    email: $('fEmail').value,
+    name:  $('fName').value.trim(),
+    business: $('fBiz').value.trim(),
+    phone: $('fPhone').value.trim(),
+    email: $('fEmail').value.trim(),
     businessType: $('fType').value,
+    businessTypeLabel: (VERTICALS[$('fType').value] || {}).label || 'Other',
+    source: 'Folosure interactive demo',
+    demoTabAtSubmit: STATE.tab,
+    pageUrl: location.href,
     submittedAt: new Date().toISOString()
   };
-  // TODO: wire to form webhook / API endpoint
-  console.log('[Folosure demo] lead captured:', payload);
 
+  const btn = e.target.querySelector('button[type=submit]');
+  if (btn){ btn.disabled = true; btn.textContent = 'Sending…'; }
+
+  const delivered = await sendLead(payload);
+  showLeadSuccess(payload, delivered);
+}
+
+/* Posts the lead to the CRM inbound webhook.
+   Tries a normal CORS request first so we can read the real status; if the
+   endpoint does not send CORS headers the request is replayed as no-cors,
+   which still delivers but returns an opaque response. Either way the
+   visitor sees the same confirmation — we never show them a plumbing error. */
+async function sendLead(payload){
+  if (!LEAD_CAPTURE.webhookUrl){
+    console.log('[Folosure] no webhookUrl set — lead not sent. Payload:', payload);
+    return false;
+  }
+  const body = JSON.stringify(payload);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), LEAD_CAPTURE.timeoutMs);
+  try {
+    const res = await fetch(LEAD_CAPTURE.webhookUrl, {
+      method:'POST', headers:{ 'Content-Type':'application/json' }, body, signal: ctrl.signal
+    });
+    clearTimeout(timer);
+    console.log('[Folosure] lead POST status', res.status);
+    return res.ok;
+  } catch (err){
+    clearTimeout(timer);
+    try {
+      await fetch(LEAD_CAPTURE.webhookUrl, {
+        method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain' }, body
+      });
+      console.log('[Folosure] lead sent via no-cors fallback (status not readable)');
+      return true;
+    } catch (err2){
+      console.error('[Folosure] lead delivery FAILED — capture this manually:', payload, err2);
+      return false;
+    }
+  }
+}
+
+function showLeadSuccess(payload, delivered){
+  if (!delivered) console.warn('[Folosure] lead shown as received but not delivered to CRM');
   $('formCard').innerHTML = `
     <div class="center" style="padding:1.5rem 0">
       <div style="font-size:3rem">✅</div>
@@ -4100,12 +4191,29 @@ function updatePresenter(){
   $('presenterBody').innerHTML = `<ul>${n.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
 }
 
+/* Footer contact block. Empty fields are skipped entirely so a half-filled
+   CONTACT block never renders a stray separator or an empty line. */
+function renderContact(){
+  const el = $('footerContact'); if (!el) return;
+  const rows = [];
+  rows.push(`<div><strong style="color:var(--on-brand)">${esc(CONTACT.company || 'Folosure')}</strong></div>`);
+  if (CONTACT.repName) rows.push(`<div>${esc(CONTACT.repName)}</div>`);
+  const line = [];
+  if (CONTACT.email) line.push(`<a href="mailto:${esc(CONTACT.email)}">${esc(CONTACT.email)}</a>`);
+  if (CONTACT.phone) line.push(`<a href="tel:${esc(CONTACT.phone.replace(/[^\d+]/g,''))}">${esc(CONTACT.phone)}</a>`);
+  if (line.length) rows.push(`<div>${line.join(' · ')}</div>`);
+  if (CONTACT.address) rows.push(`<div>${esc(CONTACT.address)}</div>`);
+  if (CONTACT.website) rows.push(`<div><a href="https://${esc(CONTACT.website.replace(/^https?:\/\//,''))}">${esc(CONTACT.website)}</a></div>`);
+  el.innerHTML = rows.join('');
+}
+
 /* =============== BOOT =============== */
 function boot(){
   renderVerticalSelect();
   renderTabbar();
   applyTheme();
   renderAll();
+  renderContact();
   go('problem');
   syncNavHeight();
   window.addEventListener('resize', syncNavHeight);
