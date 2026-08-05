@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Folosure — Your customers come back. Automatically.</title>
 <meta name="description" content="Folosure brings back the customers you already paid to acquire — with automated call, email and text follow-up that runs forever.">
+<meta name="theme-color" content="#2743C4">
 
 <!-- ============================================================
      FOLOSURE INTERACTIVE SALES DEMO
@@ -178,6 +179,10 @@ const VERTICALS = {
 /* ------------------------------------------------------------------ */
 'auto-repair': {
   label:'Auto Repair Shop', short:'shop', icon:'🔧',
+  bizName:'Westside Auto Care',
+  /* per-vertical palette — see USE_VERTICAL_THEMES below to switch these off */
+  theme:{ name:'Steel & Safety Orange', primary:'#1E3A8A', primaryDark:'#152C6B', accent:'#C2410C', bg:'#F4F6FC' },
+  reputation:{ rating:4.8, reviews:214, newThisMonth:19 },
   customerWord:'customer', jobWord:'service',
   avgTicket: 245, visitsPerYear: 1.8, activeCustomers: 1400,
   reactivationRate: .12, lapseRate: .42, reminderIntervalMonths: 5,
@@ -394,6 +399,9 @@ const VERTICALS = {
 /* ------------------------------------------------------------------ */
 'real-estate': {
   label:'Real Estate Broker', short:'brokerage', icon:'🏡',
+  bizName:'Carter & Co. Realty',
+  theme:{ name:'Navy & Brass', primary:'#14304F', primaryDark:'#0D2135', accent:'#8A6516', bg:'#F8F7F3' },
+  reputation:{ rating:4.9, reviews:96, newThisMonth:11 },
   customerWord:'client', jobWord:'closing',
   avgTicket: 8400, visitsPerYear: .3, activeCustomers: 640,
   reactivationRate: .08, lapseRate: .55, reminderIntervalMonths: 6,
@@ -609,6 +617,9 @@ const VERTICALS = {
 /* ------------------------------------------------------------------ */
 'retail': {
   label:'Gift & Candy Shop', short:'shop', icon:'🍬',
+  bizName:'Sugar & Twine',
+  theme:{ name:'Berry & Caramel', primary:'#9D174D', primaryDark:'#7A1039', accent:'#B45309', bg:'#FDF4F7' },
+  reputation:{ rating:4.9, reviews:341, newThisMonth:27 },
   customerWord:'customer', jobWord:'visit',
   avgTicket: 38, visitsPerYear: 4.5, activeCustomers: 2200,
   reactivationRate: .14, lapseRate: .48, reminderIntervalMonths: 3,
@@ -820,6 +831,9 @@ const VERTICALS = {
 /* ------------------------------------------------------------------ */
 'dental': {
   label:'Dental / Medical Practice', short:'practice', icon:'🦷',
+  bizName:'Riverside Family Dental',
+  theme:{ name:'Clinical Teal & Coral', primary:'#0E7490', primaryDark:'#0A5872', accent:'#BE3A22', bg:'#F1F9FB' },
+  reputation:{ rating:4.9, reviews:452, newThisMonth:34 },
   customerWord:'patient', jobWord:'appointment',
   avgTicket: 245, visitsPerYear: 1.9, activeCustomers: 1800,
   reactivationRate: .11, lapseRate: .35, reminderIntervalMonths: 6,
@@ -1035,6 +1049,9 @@ const VERTICALS = {
 /* ------------------------------------------------------------------ */
 'hvac': {
   label:'HVAC / Home Services', short:'company', icon:'❄️',
+  bizName:'Northline Heating & Air',
+  theme:{ name:'Cool Blue & Heat Orange', primary:'#075985', primaryDark:'#053F5E', accent:'#C2410C', bg:'#F2F8FC' },
+  reputation:{ rating:4.7, reviews:288, newThisMonth:22 },
   customerWord:'customer', jobWord:'job',
   avgTicket: 320, visitsPerYear: 1.6, activeCustomers: 1100,
   reactivationRate: .13, lapseRate: .45, reminderIntervalMonths: 6,
@@ -1252,6 +1269,9 @@ const VERTICALS = {
 /* ------------------------------------------------------------------ */
 'salon': {
   label:'Salon / Barbershop / Med Spa', short:'salon', icon:'💈',
+  bizName:'Vine & Vale Salon',
+  theme:{ name:'Plum & Rose', primary:'#6B21A8', primaryDark:'#4F1580', accent:'#BE185D', bg:'#FAF5FD' },
+  reputation:{ rating:4.9, reviews:376, newThisMonth:41 },
   customerWord:'client', jobWord:'appointment',
   avgTicket: 72, visitsPerYear: 7, activeCustomers: 950,
   reactivationRate: .15, lapseRate: .40, reminderIntervalMonths: 2,
@@ -1466,6 +1486,12 @@ const VERTICALS = {
 
 const VERTICAL_ORDER = ['auto-repair','real-estate','retail','dental','hvac','salon'];
 const DEFAULT_VERTICAL = 'auto-repair';
+
+/* Each vertical re-skins the demo using its own `theme` block above, so an
+   auto shop and a salon do not look like the same product.
+   Set this to false to ignore them and use one palette everywhere — the
+   BRAND block at the top of the file then controls all colours again. */
+const USE_VERTICAL_THEMES = true;
 </script>
 
 
@@ -2046,6 +2072,25 @@ details.faq p{ margin:.6rem 0 0; font-size:.88rem; color:var(--brand-muted); }
 .footer a{ color:var(--on-brand); }
 .footer .wordmark{ color:var(--on-brand); }
 
+/* business identity bar (dashboard) */
+.bizbar{ display:flex; align-items:center; gap:.85rem; flex-wrap:wrap;
+  background:var(--brand-surface); border:1px solid var(--brand-border);
+  border-left:4px solid var(--brand-primary);
+  border-radius:var(--brand-radius); padding:.85rem 1.1rem; margin-top:1.2rem; box-shadow:var(--shadow-sm); }
+.bizmark{ width:2.6rem; height:2.6rem; border-radius:12px; display:grid; place-items:center;
+  font-size:1.35rem; background:var(--tint-primary2); flex:0 0 auto; }
+.bizname{ font-weight:800; font-size:1.05rem; letter-spacing:-.02em; }
+.bizmeta{ font-size:.76rem; color:var(--brand-muted); }
+.bizrep{ margin-left:auto; text-align:right; }
+.stars{ color:var(--brand-accent); font-size:.95rem; letter-spacing:1px; }
+.ratenum{ color:var(--brand-ink); font-weight:800; font-size:.9rem; margin-left:.35rem; letter-spacing:0; }
+@media (max-width:560px){ .bizrep{ margin-left:0; text-align:left; width:100%; } }
+
+/* palette swap should feel deliberate, not jarring */
+body, .nav, .tabbar, .card, .stat, .node, .price-card, .wf-card, .btn{
+  transition: background-color .35s ease, border-color .35s ease, color .35s ease;
+}
+
 /* compliance strip */
 .compliance{ font-size:.72rem; color:var(--brand-muted); background:var(--brand-bg);
   border:1px solid var(--brand-border); border-radius:var(--radius-sm); padding:.55rem .7rem; margin-top:.6rem; }
@@ -2419,11 +2464,30 @@ function renderVerticalSelect(){
     .map(k => `<option value="${k}"${k === STATE.slug ? ' selected' : ''}>${VERTICALS[k].icon} ${VERTICALS[k].label}</option>`)
     .join('');
 }
+/* Re-skin the whole demo for the selected business type.
+   Only hue-carrying tokens change — success green and warning red stay put,
+   because green always means money and red always means lost money. Every
+   derived tint recomputes automatically since they are color-mix() of these. */
+function applyTheme(){
+  const root = document.documentElement.style;
+  const t = (USE_VERTICAL_THEMES && V().theme) || null;
+  const set = (k, v) => v ? root.setProperty(k, v) : root.removeProperty(k);
+  set('--brand-primary',      t && t.primary);
+  set('--brand-primary-dark', t && t.primaryDark);
+  set('--brand-accent',       t && t.accent);
+  set('--brand-bg',           t && t.bg);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', (t && t.primary) || '#2743C4');
+}
+
 function setVertical(slug){
   STATE.slug = slug;
   STATE.wfIndex = 0;
   STATE.schedule = 'default';
   STATE.countedTabs = {};
+  const sel = $('verticalSelect');            // keep the dropdown in sync when
+  if (sel && sel.value !== slug) sel.value = slug;   // switched programmatically
+  applyTheme();
   renderAll();
   onTabEnter(STATE.tab);
   updatePresenter();
@@ -3362,6 +3426,18 @@ function renderDashboard(){
     <h1>Ninety days in.</h1>
     <p class="lead">This is what the ${v.short} looks like once the engine has been running a quarter. Sample data — your numbers replace these in the trial.</p>
 
+    <div class="bizbar">
+      <span class="bizmark" aria-hidden="true">${v.icon}</span>
+      <div style="min-width:0">
+        <div class="bizname">${esc(v.bizName)}</div>
+        <div class="bizmeta">${esc(v.label)} · ${num(v.activeCustomers)} ${v.customerWord}s on file · reporting ${fmtShort(dAgo(90))} – ${fmtShort(NOW)}</div>
+      </div>
+      <div class="bizrep">
+        <div class="stars">${'★'.repeat(Math.round(v.reputation.rating))}<span class="ratenum">${v.reputation.rating}</span></div>
+        <div class="bizmeta">${num(v.reputation.reviews)} reviews · +${v.reputation.newThisMonth} this month</div>
+      </div>
+    </div>
+
     <div class="grid g3" style="margin-top:1.3rem">
       ${kpi('kpiSent',    'Messages sent',       d.sent)}
       ${kpi('kpiOpen',    'Open rate',           openRate)}
@@ -3898,6 +3974,7 @@ function updatePresenter(){
 function boot(){
   renderVerticalSelect();
   renderTabbar();
+  applyTheme();
   renderAll();
   go('problem');
 
