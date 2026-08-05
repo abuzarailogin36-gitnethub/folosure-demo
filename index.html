@@ -1654,9 +1654,9 @@ a{ color:var(--brand-primary); }
 /* Logo slot. fitLogo() measures the uploaded image's non-transparent area and
    zooms it to fill this box, so a logo with lots of empty padding still reads
    at full size. Falls back to a plain 34px fit if measuring is not possible. */
-.brand .logobox{ height:34px; width:34px; position:relative; overflow:hidden; flex:0 0 auto; display:block; }
-.brand .logobox img{ position:absolute; left:0; top:0; height:34px; width:auto; max-width:none; }
-.wordmark{ font-weight:800; font-size:1.3rem; letter-spacing:-.035em; color:var(--brand-primary); }
+.brand .logobox{ height:46px; width:46px; position:relative; overflow:hidden; flex:0 0 auto; display:block; }
+.brand .logobox img{ position:absolute; left:0; top:0; height:46px; width:auto; max-width:none; }
+.wordmark{ font-weight:800; font-size:1.75rem; letter-spacing:-.035em; color:var(--brand-primary); }
 .wordmark span{ color:var(--brand-accent); }
 .nav-mid{ flex:1 1 auto; display:flex; justify-content:center; min-width:0; }
 .vsel{ display:flex; align-items:center; gap:.5rem; background:var(--tint-primary); border:1px solid var(--brand-border);
@@ -2323,7 +2323,7 @@ function logoFallback(img){
    70% empty space, so a plain 34px fit renders the mark at ~13px. This finds
    the actual non-transparent bounds and scales that region to fill the slot.
    The source file is never modified; this is display-only. */
-const LOGO_BOX = 34, LOGO_PAD = 2;
+const LOGO_BOX = 46, LOGO_PAD = 2;   // keep in sync with .brand .logobox in the stylesheet
 function fitLogo(img){
   const box = img.closest('.logobox');
   if (!box || !img.naturalWidth) return;
@@ -2368,6 +2368,7 @@ function fitLogo(img){
   img.style.height = h + 'px';
   img.style.left   = (-b.x * w) + 'px';
   img.style.top    = (-b.y * h + (LOGO_BOX - markH) / 2) + 'px';
+  syncNavHeight();          // the logo changes the nav's height; re-measure
 }
 
 /* =============== SCREENSHOTS (graceful placeholders) ===============
@@ -2468,6 +2469,16 @@ function renderVerticalSelect(){
    Only hue-carrying tokens change — success green and warning red stay put,
    because green always means money and red always means lost money. Every
    derived tint recomputes automatically since they are color-mix() of these. */
+/* The tab bar sticks below the nav using --nav-h. Hardcoding that value breaks
+   the moment the logo, wordmark or nav padding changes, and it differs per
+   breakpoint. Measure it instead. */
+function syncNavHeight(){
+  const nav = document.querySelector('.nav');
+  if (!nav) return;
+  const h = Math.ceil(nav.getBoundingClientRect().height);   // ceil: a hairline gap beats an overlap
+  if (h > 0) document.documentElement.style.setProperty('--nav-h', h + 'px');
+}
+
 function applyTheme(){
   const root = document.documentElement.style;
   const t = (USE_VERTICAL_THEMES && V().theme) || null;
@@ -3977,6 +3988,9 @@ function boot(){
   applyTheme();
   renderAll();
   go('problem');
+  syncNavHeight();
+  window.addEventListener('resize', syncNavHeight);
+  window.addEventListener('load', syncNavHeight);   // after webfonts settle
 
   $('verticalSelect').addEventListener('change', e => setVertical(e.target.value));
 
