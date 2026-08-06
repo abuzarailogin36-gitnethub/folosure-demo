@@ -2082,6 +2082,11 @@ details.faq p{ margin:.6rem 0 0; font-size:.88rem; color:var(--brand-muted); }
 .form-grid input,.form-grid select{ width:100%; font:inherit; font-size:.92rem; padding:.6rem .8rem;
   border:1px solid var(--brand-border); border-radius:var(--radius-sm); background:var(--brand-surface); color:var(--brand-ink); }
 .form-grid input:focus,.form-grid select:focus{ outline:none; border-color:var(--brand-primary); box-shadow:0 0 0 3px var(--tint-primary2); }
+.field-err{ font-size:.74rem; font-weight:650; color:var(--brand-warning); margin-top:.3rem; display:none; }
+.form-grid .invalid input{ border-color:var(--brand-warning); background:var(--tint-warning); }
+.form-grid .invalid input:focus{ border-color:var(--brand-warning); box-shadow:0 0 0 3px var(--tint-warning); }
+.form-grid .invalid .field-err{ display:block; }
+.form-grid .invalid label{ color:var(--brand-warning); }
 
 /* onboarding timeline */
 .steps{ display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); counter-reset:s; }
@@ -4030,11 +4035,21 @@ function renderStart(){
       <div class="card card-pad-lg" id="formCard">
         <h3>Start your free trial</h3>
         <p class="muted" style="font-size:.87rem">We’ll call you within one business hour.</p>
-        <form class="form-grid" onsubmit="submitLead(event)">
-          <div><label for="fName">Your name</label><input id="fName" required autocomplete="name"></div>
-          <div><label for="fBiz">Business name</label><input id="fBiz" required autocomplete="organization"></div>
-          <div><label for="fPhone">Phone</label><input id="fPhone" type="tel" required autocomplete="tel"></div>
-          <div><label for="fEmail">Email</label><input id="fEmail" type="email" required autocomplete="email"></div>
+        <form class="form-grid" onsubmit="submitLead(event)" novalidate>
+          <div id="w-fName"><label for="fName">Your name</label>
+            <input id="fName" autocomplete="name" maxlength="60" onblur="validateField('fName')" oninput="clearFieldError('fName')">
+            <div class="field-err" id="err-fName"></div></div>
+          <div id="w-fBiz"><label for="fBiz">Business name</label>
+            <input id="fBiz" autocomplete="organization" maxlength="80" onblur="validateField('fBiz')" oninput="clearFieldError('fBiz')">
+            <div class="field-err" id="err-fBiz"></div></div>
+          <div id="w-fPhone"><label for="fPhone">Phone</label>
+            <input id="fPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="18"
+                   oninput="formatPhone(this)" onblur="validateField('fPhone')">
+            <div class="field-err" id="err-fPhone"></div></div>
+          <div id="w-fEmail"><label for="fEmail">Email</label>
+            <input id="fEmail" type="email" inputmode="email" autocomplete="email" maxlength="120"
+                   onblur="validateField('fEmail')" oninput="clearFieldError('fEmail')">
+            <div class="field-err" id="err-fEmail"></div></div>
           <div class="full"><label for="fType">Business type</label>
             <select id="fType">${VERTICAL_ORDER.map(k => `<option value="${k}"${k === STATE.slug ? ' selected' : ''}>${VERTICALS[k].label}</option>`).join('')}<option value="other">Something else</option></select>
           </div>
@@ -4076,12 +4091,84 @@ function renderStart(){
   </div>`;
 }
 
+/* ---------- form validation ----------
+   The form feeds a real CRM, so garbage in means garbage in the pipeline.
+   Each rule returns an error string, or '' when the value is acceptable. */
+const FIELD_RULES = {
+  fName: v => {
+    const s = v.trim();
+    if (!s) return 'Please enter your name.';
+    if (s.length < 2) return 'That name looks too short.';
+    if (/\d/.test(s)) return 'Names should not contain numbers.';
+    if (!/^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’.\-\s]*$/.test(s)) return 'Letters, spaces, hyphens and apostrophes only.';
+    return '';
+  },
+  fBiz: v => {
+    const s = v.trim();
+    if (!s) return 'Please enter your business name.';
+    if (s.length < 2) return 'That business name looks too short.';
+    return '';
+  },
+  fPhone: v => {
+    const d = v.replace(/\D/g, '');
+    if (!d) return 'Please enter your phone number.';
+    const n = (d.length === 11 && d[0] === '1') ? d.slice(1) : d;
+    if (n.length !== 10) return `US numbers are 10 digits — you entered ${n.length}.`;
+    if (/^(\d)\1{9}$/.test(n)) return 'That does not look like a real number.';
+    if (n[0] === '0' || n[0] === '1') return 'Area code cannot start with 0 or 1.';
+    if (n[3] === '0' || n[3] === '1') return 'That is not a valid US number.';
+    return '';
+  },
+  fEmail: v => {
+    const s = v.trim();
+    if (!s) return 'Please enter your email.';
+    if (!/^[^\s@]+@[^\s@]+$/.test(s)) return 'Email needs an @ — like name@business.com';
+    if (!/^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(s)) return 'Add a domain ending, like .com';
+    if (!/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(s)) return 'Enter a valid email, like name@business.com';
+    return '';
+  }
+};
+
+function validateField(id){
+  const el = $(id); if (!el) return true;
+  const msg = (FIELD_RULES[id] || (() => ''))(el.value);
+  const wrap = $('w-' + id), err = $('err-' + id);
+  if (wrap) wrap.classList.toggle('invalid', !!msg);
+  if (err) err.textContent = msg;
+  return !msg;
+}
+function clearFieldError(id){
+  const wrap = $('w-' + id);
+  if (wrap && wrap.classList.contains('invalid')) validateField(id);
+}
+/* Types out as (972) 372-4805 while preserving the caret at the end. */
+function formatPhone(el){
+  let d = el.value.replace(/\D/g, '');
+  if (d.length === 11 && d[0] === '1') d = d.slice(1);
+  d = d.slice(0, 10);
+  el.value = d.length > 6 ? `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`
+           : d.length > 3 ? `(${d.slice(0,3)}) ${d.slice(3)}`
+           : d.length     ? `(${d}`
+           : '';
+  clearFieldError('fPhone');
+}
+
 async function submitLead(e){
   e.preventDefault();
 
   // honeypot: real people never fill a hidden field, bots fill everything
   const trap = $('fWebsite');
   if (trap && trap.value){ console.warn('[Folosure] spam blocked'); return; }
+
+  // validate everything, then focus the first problem
+  const ids = ['fName','fBiz','fPhone','fEmail'];
+  const bad = ids.filter(id => !validateField(id));
+  if (bad.length){
+    const first = $(bad[0]);
+    first.focus();
+    first.scrollIntoView({ block:'center', behavior:'smooth' });
+    return;
+  }
 
   const payload = {
     name:  $('fName').value.trim(),
