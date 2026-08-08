@@ -4170,14 +4170,34 @@ async function submitLead(e){
     return;
   }
 
+  /* Split the name and normalise the phone before sending.
+     The CRM's Create/Update Contact action expects first/last name and an
+     E.164 phone; handing it a single "name" string and a formatted phone
+     makes that action fail, and a failed action stops the workflow before
+     the notification ever runs. Both shapes are sent so either maps. */
+  const rawName = $('fName').value.trim().replace(/\s+/g, ' ');
+  const nameBits = rawName.split(' ');
+  const firstName = nameBits[0] || '';
+  const lastName  = nameBits.slice(1).join(' ');
+  const digits = $('fPhone').value.replace(/\D/g, '');
+  const tenDigit = (digits.length === 11 && digits[0] === '1') ? digits.slice(1) : digits;
+  const phoneE164 = tenDigit.length === 10 ? '+1' + tenDigit : $('fPhone').value.trim();
+  const vertLabel = (VERTICALS[$('fType').value] || {}).label || 'Other';
+
   const payload = {
-    name:  $('fName').value.trim(),
-    business: $('fBiz').value.trim(),
-    phone: $('fPhone').value.trim(),
+    // standard contact fields the CRM maps automatically
+    firstName, lastName,
+    fullName: rawName,
+    name: rawName,                       // kept for backward compatibility
     email: $('fEmail').value.trim(),
-    businessType: $('fType').value,
-    businessTypeLabel: (VERTICALS[$('fType').value] || {}).label || 'Other',
+    phone: phoneE164,                    // E.164, e.g. +19723724805
+    companyName: $('fBiz').value.trim(),
+    business:    $('fBiz').value.trim(), // kept for backward compatibility
     source: 'Folosure interactive demo',
+    tags: ['folosure-demo', 'trial-request', $('fType').value],
+    // context for you, not for contact creation
+    businessType: $('fType').value,
+    businessTypeLabel: vertLabel,
     demoTabAtSubmit: STATE.tab,
     pageUrl: location.href,
     submittedAt: new Date().toISOString()
