@@ -1532,6 +1532,14 @@ const LEAD_CAPTURE = {
   timeoutMs: 8000
 };
 
+/* ===== SMS / CALL CONSENT DISCLOSURE =====
+   Shown immediately above the submit button and stored with every lead as
+   proof of what the person agreed to. Required by the TCPA (prior express
+   written consent) and by the CTIA messaging rules the carriers enforce.
+   Change this wording only with legal sign-off — the stored consent record
+   must match what was actually displayed. */
+const SMS_CONSENT_TEXT = 'By submitting, you authorize FOLOSURE LLC to text/call the number above for promotional messages, possibly using automated means. Msg/data rates apply, msg frequency varies. Consent is not a condition of purchase. See terms and privacy policy. Text HELP for help and STOP to unsubscribe';
+
 /* ===== YOUR CONTACT DETAILS — EDIT THIS BLOCK =====
    Used in the footer and on the Get Started tab. Anything left empty is
    simply hidden, so partial details never leave a dangling label. */
@@ -2082,6 +2090,11 @@ details.faq p{ margin:.6rem 0 0; font-size:.88rem; color:var(--brand-muted); }
 .form-grid input,.form-grid select{ width:100%; font:inherit; font-size:.92rem; padding:.6rem .8rem;
   border:1px solid var(--brand-border); border-radius:var(--radius-sm); background:var(--brand-surface); color:var(--brand-ink); }
 .form-grid input:focus,.form-grid select:focus{ outline:none; border-color:var(--brand-primary); box-shadow:0 0 0 3px var(--tint-primary2); }
+/* Consent disclosure — deliberately readable, not fine print. Regulators and
+   carriers both expect this to be "clear and conspicuous". */
+.consent{ font-size:.78rem; line-height:1.5; color:var(--brand-ink); background:var(--brand-bg);
+  border:1px solid var(--brand-border); border-radius:var(--radius-sm); padding:.7rem .85rem; margin-top:.2rem; }
+.consent a{ color:var(--brand-primary); text-decoration:underline; }
 .field-err{ font-size:.74rem; font-weight:650; color:var(--brand-warning); margin-top:.3rem; display:none; }
 .form-grid .invalid input{ border-color:var(--brand-warning); background:var(--tint-warning); }
 .form-grid .invalid input:focus{ border-color:var(--brand-warning); box-shadow:0 0 0 3px var(--tint-warning); }
@@ -2265,6 +2278,17 @@ body, .nav, .tabbar, .card, .stat, .node, .price-card, .wf-card, .btn{
 </div>
 
 <div class="toast-zone" id="toastZone" aria-live="polite"></div>
+
+<!-- ============================================================
+     CHAT WIDGET
+     Loads from an external host, so it is the one part of this page that
+     needs internet. It is async and failure-tolerant: if it cannot load
+     (no wifi at a customer site), the rest of the demo is unaffected.
+     ============================================================ -->
+<script src="https://widgets.leadconnectorhq.com/loader.js"
+        data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
+        data-widget-id="6a805fa3b7fff8e52989dcf7"
+        data-source="WEB_USER" async></script>
 
 <!-- presenter mode (press P) -->
 <div class="presenter" id="presenter" aria-live="polite">
@@ -4057,6 +4081,10 @@ function renderStart(){
             <label for="fWebsite">Leave this field empty</label>
             <input id="fWebsite" name="website" tabindex="-1" autocomplete="off">
           </div>
+          <!-- TCPA / CTIA consent disclosure. Must stay immediately adjacent to the
+               submit button and stay legible — do not shrink, hide or collapse it. -->
+          <div class="full consent">${esc(SMS_CONSENT_TEXT).replace('terms and privacy policy',
+              '<a href="terms.html" target="_blank" rel="noopener">terms</a> and <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>')}</div>
           <div class="full"><button class="btn btn-accent btn-lg" type="submit" style="width:100%">Start my 14-day free trial</button></div>
           <div class="full center muted" style="font-size:.75rem">No credit card. Cancel any time. We never sell your data.</div>
         </form>
@@ -4195,6 +4223,13 @@ async function submitLead(e){
     business:    $('fBiz').value.trim(), // kept for backward compatibility
     source: 'Folosure interactive demo',
     tags: ['folosure-demo', 'trial-request', $('fType').value],
+    // Proof of consent. Store these on the contact record — if a TCPA claim is
+    // ever made, the defence is showing exactly what wording the person saw and
+    // when they submitted it. Retain for at least 4 years.
+    smsConsent: true,
+    smsConsentText: SMS_CONSENT_TEXT,
+    smsConsentAt: new Date().toISOString(),
+    smsConsentUrl: location.href,
     // context for you, not for contact creation
     businessType: $('fType').value,
     businessTypeLabel: vertLabel,
@@ -4311,6 +4346,7 @@ function renderContact(){
   if (line.length) rows.push(`<div>${line.join(' · ')}</div>`);
   if (CONTACT.address) rows.push(`<div>${esc(CONTACT.address)}</div>`);
   if (CONTACT.website) rows.push(`<div><a href="https://${esc(CONTACT.website.replace(/^https?:\/\//,''))}">${esc(CONTACT.website)}</a></div>`);
+  rows.push(`<div style="margin-top:.4rem"><a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms</a></div>`);
   el.innerHTML = rows.join('');
 }
 
