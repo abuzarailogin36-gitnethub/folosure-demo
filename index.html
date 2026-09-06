@@ -1566,7 +1566,7 @@ const PRICING = {
     {
       id:'reconnect', name:'Reconnect', badge:'',
       tagline:'Wake up the list you already have.',
-      monthly: 97,
+      monthly: 97, setup: 299,
       best:'Best for a shop that has a customer list and has never once emailed it.',
       features:[
         'Your full customer list imported and cleaned',
@@ -1576,13 +1576,13 @@ const PRICING = {
         'Contact tagging and smart lists',
         'Results dashboard',
         '3 user logins',
-        'Done-for-you setup on a 30-minute kickoff call'
+        'Done-for-you setup on a 30-minute kickoff call (one-time fee)'
       ]
     },
     {
       id:'grow', name:'Grow', badge:'Most Popular',
       tagline:'Add texting and the full automation engine.',
-      monthly: 197, popular:true,
+      monthly: 197, setup: 499, popular:true,
       best:'Best for most businesses. This is the tier that actually moves the revenue number.',
       features:[
         'Everything in Reconnect',
@@ -1599,7 +1599,7 @@ const PRICING = {
     {
       id:'autopilot', name:'Autopilot', badge:'Best Value',
       tagline:'The 24/7 AI front desk. It answers everything.',
-      monthly: 497,
+      monthly: 497, setup: 799,
       best:'Best if you miss calls. One recovered job a month more than covers the difference.',
       features:[
         'Everything in Grow',
@@ -1628,7 +1628,7 @@ const PRICING = {
     { label:'AI text & email replies',                 r:'—',       g:'—',              a:'✓' },
     { label:'AI lead qualification',                   r:'—',       g:'—',              a:'✓' },
     { label:'User logins',                             r:'3',       g:'10',             a:'Unlimited' },
-    { label:'Done-for-you setup',                      r:'✓',       g:'✓',              a:'Priority' }
+    { label:'Done-for-you setup (one-time fee)',       r:'$299',    g:'$499',           a:'$799 · priority' }
   ],
 
   faqs:[
@@ -3971,7 +3971,7 @@ function renderPricing(){
   <div class="wrap section">
     <div class="eyebrow">Pricing</div>
     <h1>Three plans. No contract.</h1>
-    <p class="lead">Every plan includes done-for-you setup: we import your list, build your workflows and configure everything. You are not buying software to learn — you are buying a machine we install.</p>
+    <p class="lead">Every plan is set up for you by our team — we import your list, build your workflows and configure everything for a one-time setup fee. You are not buying software to learn — you are buying a machine we install.</p>
 
     <div class="row" style="margin:1.2rem 0;justify-content:center">
       <div class="chips">
@@ -3992,6 +3992,7 @@ function renderPricing(){
             <span class="price-amt">$${price(t)}</span>
             <span class="price-per">/month</span>
             <div class="muted" style="font-size:.76rem">${annual ? `Billed $${(t.monthly * 10).toLocaleString()} a year · you save $${(t.monthly * 2).toLocaleString()}` : 'Month-to-month · cancel any time'}</div>
+            <div class="muted" style="font-size:.76rem;margin-top:.15rem">+ $${t.setup.toLocaleString()} one-time setup fee</div>
           </div>
           <ul class="feat">${t.features.map(f => `<li><span>${f}</span></li>`).join('')}</ul>
           <div class="muted" style="font-size:.78rem;border-top:1px solid var(--brand-border);padding-top:.6rem">${t.best}</div>
@@ -4003,10 +4004,11 @@ function renderPricing(){
       <div class="row" style="gap:.7rem;flex-wrap:nowrap;align-items:flex-start">
         <span style="font-size:1.4rem">🛠️</span>
         <div>
-          <strong>Setup &amp; onboarding is included — and we do it, not you.</strong>
+          <strong>Setup &amp; onboarding is done by us, not you.</strong>
           <div class="muted" style="font-size:.87rem;margin-top:.2rem">
             We import and clean your ${V().customerWord} list, build every workflow around how your ${V().short} actually runs,
             write the messages, and configure the AI with your hours, prices and services. One 30-minute call from you. That is the whole ask.
+            Covered by the one-time setup fee on your plan — billed once, never again.
           </div>
         </div>
       </div>
