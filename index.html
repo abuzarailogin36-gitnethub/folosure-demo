@@ -3996,6 +3996,7 @@ function renderPricing(){
           <ul class="feat">${t.features.map(f => `<li><span>${f}</span></li>`).join('')}</ul>
           <div class="muted" style="font-size:.78rem;border-top:1px solid var(--brand-border);padding-top:.6rem">${t.best}</div>
           <button class="btn ${t.popular ? 'btn-accent' : 'btn-primary'}" onclick="go('start')">Start 14-Day Free Trial</button>
+          <div class="center muted" style="font-size:.72rem">100% satisfaction guarantee · cancel any time</div>
         </div>`).join('')}
     </div>
 
@@ -4047,7 +4048,7 @@ function renderStart(){
   <div class="wrap section">
     <div class="eyebrow">Get started</div>
     <h1>Load your real ${v.customerWord} list. Watch what happens.</h1>
-    <p class="lead">Fourteen days, free. Not a sandbox with fake names — your actual list, your actual ${v.customerWord}s, real messages going out. Cancel before day 14 and you are not charged.</p>
+    <p class="lead">Fourteen days, free. Not a sandbox with fake names — your actual list, your actual ${v.customerWord}s, real messages going out. <strong>100% satisfaction guarantee</strong> — cancel any time, no questions asked, and we refund you in full.</p>
 
     <div class="steps" style="margin-top:1.5rem">
       <div class="step"><div class="day">Day 1</div><h4>Kickoff call</h4><p>Thirty minutes. We learn how your ${v.short} runs, your hours, your prices, your busy season.</p></div>
@@ -4094,7 +4095,7 @@ function renderStart(){
             </label>
           </div>
           <div class="full"><button class="btn btn-accent btn-lg" type="submit" style="width:100%">Start my 14-day free trial</button></div>
-          <div class="full center muted" style="font-size:.75rem">A payment card is required to start. Cancel before day 14 and you are not charged. We never sell your data.</div>
+          <div class="full center muted" style="font-size:.75rem">A payment card is required to start. <strong>100% satisfaction guarantee</strong> — cancel any time, no questions asked, full refund. We never sell your data.</div>
         </form>
       </div>
 
