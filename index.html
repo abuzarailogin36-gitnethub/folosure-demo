@@ -1495,36 +1495,40 @@ const INVESTOR = {
   /* A buy-box is the buyer's standing criteria. The matcher scores every
      property against every buy-box and ranks by how many criteria fit. */
   buyers: [
-    { name:'Marcus Delaney',  phone:'555-0177', email:'marcus.d@example.com',
-      asset:'House', cities:['Plano','Frisco'], min:300000, max:600000,
-      beds:3, strategy:'Buy & hold', status:'Complete', tags:['Cash','Repeat'] },
-    { name:'Ingrid Sorensen', phone:'555-0163', email:'ingrid.s@example.com',
-      asset:'House', cities:['Arlington','Grand Prairie'], min:150000, max:320000,
-      beds:3, strategy:'Fix & flip', status:'Complete', tags:['Cash','Volume'] },
-    { name:'Tyrell Jackson',  phone:'555-0139', email:'tyrell.j@example.com',
-      asset:'Land',  cities:['Weatherford','Graford'], min:50000,  max:250000,
-      beds:0, strategy:'Land banking', status:'Complete', tags:['Land only'] },
-    { name:'Rochelle Tan',    phone:'555-0125', email:'rochelle.t@example.com',
-      asset:'House', cities:['Plano','Allen','McKinney'], min:400000, max:750000,
-      beds:4, strategy:'BRRRR', status:'Complete', tags:['Financed'] },
-    { name:'Greg Molina',     phone:'555-0148', email:'greg.m@example.com',
-      asset:'House', cities:['Dallas','Garland'], min:200000, max:400000,
-      beds:3, strategy:'Fix & flip', status:'Incomplete', tags:['New'] },
-    { name:'Nadia Haddad',    phone:'555-0111', email:'nadia.h@example.com',
-      asset:'House', cities:['Frisco','Prosper'], min:500000, max:900000,
-      beds:4, strategy:'Buy & hold', status:'Complete', tags:['Cash','Luxury'] }
+    { name:'Marcus Delaney',  leadType:'Buyer',            asset:'House',
+      counties:['Collin'],            min:300000, max:600000,
+      beds:[3,5], baths:[2,3], sqft:[1800,3000], year:[1995,2020],
+      strategy:'Buy & hold',  status:'Complete', tags:['Cash','Repeat'] },
+    { name:'Ingrid Sorensen', leadType:'Builder/Developer', asset:'House',
+      counties:['Tarrant'],           min:150000, max:400000,
+      beds:[3,5], baths:[1,2], sqft:[1000,2200], year:[2000,2020],
+      strategy:'Fix & flip',  status:'Complete', tags:['Cash','Volume'] },
+    { name:'Tyrell Jackson',  leadType:'Buyer',            asset:'Land',
+      counties:['Parker','Palo Pinto'], min:50000, max:250000,
+      beds:null, baths:null, sqft:null, year:null,
+      strategy:'Land banking', status:'Complete', tags:['Land only'] },
+    { name:'Rochelle Tan',    leadType:'Buyer',            asset:'House',
+      counties:['Collin','Denton'],   min:400000, max:750000,
+      beds:[4,6], baths:[2,4], sqft:[2400,4000], year:[2005,2026],
+      strategy:'BRRRR',       status:'Complete', tags:['Financed'] },
+    { name:'Greg Molina',     leadType:'Buyer',            asset:'House',
+      counties:['Dallas'],            min:200000, max:400000,
+      beds:[3,4], baths:null, sqft:null, year:null,
+      strategy:'Fix & flip',  status:'Incomplete', tags:['New'] },
+    { name:'Nadia Haddad',    leadType:'Builder/Developer', asset:'House',
+      counties:['Denton'],            min:500000, max:900000,
+      beds:[4,5], baths:[3,4], sqft:[2800,4200], year:[2010,2026],
+      strategy:'Buy & hold',  status:'Complete', tags:['Cash','Luxury'] }
   ],
 
   properties: [
-    { addr:'123 Maple St',      city:'Plano',         asset:'House', price:500000, beds:4, baths:3, sqft:2400, arv:640000, repairs:55000 },
-    { addr:'4418 Cedar Ridge',  city:'Arlington',     asset:'House', price:245000, beds:3, baths:2, sqft:1560, arv:335000, repairs:48000 },
-    { addr:'Lot 7, County Rd 613', city:'Weatherford',asset:'Land',  price:120000, beds:0, baths:0, sqft:0,    arv:165000, repairs:12000 },
-    { addr:'909 Birchwood Ln',  city:'Frisco',        asset:'House', price:615000, beds:4, baths:3, sqft:3100, arv:760000, repairs:62000 },
-    { addr:'2207 Elmgrove Dr',  city:'Grand Prairie', asset:'House', price:189000, beds:3, baths:2, sqft:1340, arv:268000, repairs:44000 }
+    { addr:'123 Maple St',        city:'Plano',         county:'Collin',     asset:'House', price:500000, beds:4, baths:3, sqft:2400, year:2012, arv:640000, repairs:55000 },
+    { addr:'4418 Cedar Ridge',    city:'Arlington',     county:'Tarrant',    asset:'House', price:245000, beds:3, baths:2, sqft:1560, year:2004, arv:335000, repairs:48000 },
+    { addr:'Lot 7, County Rd 613',city:'Weatherford',   county:'Parker',     asset:'Land',  price:120000, beds:0, baths:0, sqft:0,    year:0,    arv:165000, repairs:12000 },
+    { addr:'909 Birchwood Ln',    city:'Frisco',        county:'Denton',     asset:'House', price:615000, beds:4, baths:3, sqft:3100, year:2016, arv:760000, repairs:62000 },
+    { addr:'2207 Elmgrove Dr',    city:'Grand Prairie', county:'Dallas',     asset:'House', price:189000, beds:3, baths:2, sqft:1340, year:1998, arv:268000, repairs:44000 }
   ],
 
-  /* Defaults for the underwriting model. Selling/closing/holding are the
-     percentages of ARV that turn gross spread into actual net profit. */
   rates: { rulePct:70, sellingPct:6, closingPct:2, holdingPct:1.5 },
 
   deals: [
@@ -1539,15 +1543,21 @@ const INVESTOR = {
    demo can show WHY something matched rather than just a number. */
 function scoreMatch(buyer, prop){
   const checks = [];
-  checks.push({ label:'Asset type', ok: buyer.asset === prop.asset,
-                detail:`wants ${buyer.asset.toLowerCase()}` });
-  checks.push({ label:'Price range', ok: prop.price >= buyer.min && prop.price <= buyer.max,
+  const range = (label, r, val, fmt) => {
+    if (!r) return;                                  // buyer left it open
+    checks.push({ label, ok: val >= r[0] && val <= r[1], detail:`${fmt(r[0])}–${fmt(r[1])}` });
+  };
+  checks.push({ label:'Asset',  ok: buyer.asset === prop.asset, detail: buyer.asset });
+  checks.push({ label:'Price',  ok: prop.price >= buyer.min && prop.price <= buyer.max,
                 detail:`${money(buyer.min)}–${money(buyer.max)}` });
-  checks.push({ label:'Target city', ok: buyer.cities.includes(prop.city),
-                detail: buyer.cities.join(', ') });
-  if (buyer.beds > 0)
-    checks.push({ label:'Bedrooms', ok: prop.beds >= buyer.beds,
-                  detail:`${buyer.beds}+ beds` });
+  checks.push({ label:'County', ok: buyer.counties.includes(prop.county),
+                detail: buyer.counties.join(', ') });
+  if (prop.asset !== 'Land'){
+    range('Beds',  buyer.beds,  prop.beds,  n => n);
+    range('Baths', buyer.baths, prop.baths, n => n);
+    range('Sq ft', buyer.sqft,  prop.sqft,  n => num(n));
+    range('Year',  buyer.year,  prop.year,  n => n);
+  }
   const hit = checks.filter(c => c.ok).length;
   return { pct: Math.round(hit / checks.length * 100), hit, total: checks.length, checks };
 }
@@ -2239,6 +2249,9 @@ details.faq p{ margin:.6rem 0 0; font-size:.88rem; color:var(--brand-muted); }
 .matchpct.good{ color:var(--brand-success); }
 .matchpct.mid{ color:var(--brand-accent); }
 .matchpct.low{ color:var(--brand-muted); }
+.fitwrap{ display:flex; align-items:center; gap:.6rem; flex:0 0 auto; }
+.fitbar{ width:88px; height:7px; border-radius:4px; background:var(--tint-muted); overflow:hidden; flex:0 0 auto; }
+.fitbar span{ display:block; height:100%; border-radius:4px; transition:width .5s ease; }
 .bbcrit{ display:flex; flex-direction:column; gap:.25rem; margin:.4rem 0 .5rem; }
 .bbcrit div{ display:flex; justify-content:space-between; gap:.6rem; font-size:.78rem; }
 .bbcrit span{ color:var(--brand-muted); }
@@ -4176,8 +4189,11 @@ function renderBuyBox(){
             <div class="bbcrit">
               <div><span>Asset</span><strong>${esc(b.asset)}</strong></div>
               <div><span>Budget</span><strong>${money(b.min)} – ${money(b.max)}</strong></div>
-              <div><span>Areas</span><strong>${esc(b.cities.join(', '))}</strong></div>
-              ${b.beds ? `<div><span>Minimum</span><strong>${b.beds}+ beds</strong></div>` : ''}
+              <div><span>Counties</span><strong>${esc(b.counties.join(', '))}</strong></div>
+              ${b.beds  ? `<div><span>Beds</span><strong>${b.beds[0]}–${b.beds[1]}</strong></div>` : ''}
+              ${b.baths ? `<div><span>Baths</span><strong>${b.baths[0]}–${b.baths[1]}</strong></div>` : ''}
+              ${b.sqft  ? `<div><span>Sq ft</span><strong>${num(b.sqft[0])}–${num(b.sqft[1])}</strong></div>` : ''}
+              ${b.year  ? `<div><span>Year built</span><strong>${b.year[0]}–${b.year[1]}</strong></div>` : ''}
               <div><span>Strategy</span><strong>${esc(b.strategy)}</strong></div>
             </div>
             <div>${b.tags.map(t => `<span class="tagchip">${esc(t)}</span>`).join('')}</div>
@@ -4190,6 +4206,8 @@ function renderBuyBox(){
       <p>Every match shows which criteria fit and which did not, so you can stand behind the call.
          Buyers stop ignoring you because everything you send them actually fits.</p>
     </div>
+
+    ${galleryHTML('buybox')}
   </div>`;
 
   renderMatches(false);
@@ -4206,7 +4224,7 @@ function renderMatches(show){
   const ranked = INVESTOR.buyers
     .map(b => ({ b, m: scoreMatch(b, p) }))
     .sort((x, y) => y.m.pct - x.m.pct);
-  const strong = ranked.filter(r => r.m.pct >= 75).length;
+  const strong = ranked.filter(r => r.m.pct >= 90).length;
   const ready = $('bbReady'); if (ready) ready.textContent = show ? num(strong) : '—';
 
   if (!show){
@@ -4215,28 +4233,43 @@ function renderMatches(show){
     return;
   }
 
-  box.innerHTML = `
-    <div class="eyebrow" style="margin-bottom:.4rem">Step 2 — ranked by fit</div>
-    <div class="matchlist">
-      ${ranked.map((r, i) => `
-        <div class="matchrow" style="animation-delay:${i * 90}ms">
-          <div class="matchrank">${i + 1}</div>
-          <div style="min-width:0;flex:1 1 200px">
-            <div class="matchname">${esc(r.b.name)}</div>
-            <div class="muted" style="font-size:.74rem">${esc(r.b.strategy)} · ${esc(r.b.cities.join(', '))}</div>
-            <div class="critrow">
-              ${r.m.checks.map(c => `<span class="crit ${c.ok ? 'ok' : 'no'}" title="${esc(c.detail)}">${c.ok ? '✓' : '✕'} ${esc(c.label)}</span>`).join('')}
-            </div>
-          </div>
-          <div class="matchpct ${r.m.pct >= 75 ? 'good' : r.m.pct >= 50 ? 'mid' : 'low'}">
-            ${r.m.pct}%
-            <span>${r.m.hit} of ${r.m.total} criteria</span>
-          </div>
-          <button class="btn ${r.m.pct >= 75 ? 'btn-accent' : 'btn-ghost'} btn-sm"
-                  onclick="sendMatch('${esc(r.b.name)}', ${r.m.pct})">Send</button>
-        </div>`).join('')}
+  const rec = ranked.filter(r => r.m.pct >= 90);
+  const alt = ranked.filter(r => r.m.pct < 90);
+  const group = (title, list, n) => !list.length ? '' : `
+    <div class="row" style="gap:.5rem;margin:.9rem 0 .4rem">
+      <strong style="font-size:.9rem">${title}</strong><span class="pill pill-primary">${n}</span>
     </div>
-    <div class="compliance">Scored on the buyer’s stated criteria only. Nothing is sent until you press Send.</div>`;
+    <div class="matchlist">${list.map(rowHTML).join('')}</div>`;
+
+  box.innerHTML = `
+    <div class="eyebrow" style="margin-bottom:.2rem">Step 2 — ranked by fit</div>
+    ${group('Recommended', rec, rec.length)}
+    ${group('Good alternatives', alt, alt.length)}
+    <div class="compliance">Scored on each buyer’s own stated criteria. Nothing is sent until you press Send.</div>`;
+
+  function rowHTML(r, i){
+    return `
+      <div class="matchrow" style="animation-delay:${i * 80}ms">
+        <div class="matchrank">${i + 1}</div>
+        <div style="min-width:0;flex:1 1 220px">
+          <div class="row" style="gap:.4rem">
+            <span class="matchname">${esc(r.b.name)}</span>
+            <span class="pill">${esc(r.b.leadType)}</span>
+          </div>
+          <div class="muted" style="font-size:.74rem">${esc(r.b.strategy)} · ${esc(r.b.counties.join(', '))} County</div>
+          <div class="critrow">
+            ${r.m.checks.map(c => `<span class="crit ${c.ok ? 'ok' : 'no'}" title="${esc(c.detail)}">${c.ok ? '✓' : '✕'} ${esc(c.label)}</span>`).join('')}
+          </div>
+        </div>
+        <div class="fitwrap">
+          <div class="fitbar"><span style="width:${r.m.pct}%;background:${r.m.pct >= 90 ? 'var(--brand-success)' : 'var(--brand-primary)'}"></span></div>
+          <div class="matchpct ${r.m.pct >= 90 ? 'good' : r.m.pct >= 70 ? 'mid' : 'low'}">${r.m.pct}%
+            <span>${r.m.total} criteria compared</span></div>
+        </div>
+        <button class="btn ${r.m.pct >= 90 ? 'btn-accent' : 'btn-ghost'} btn-sm"
+                onclick="sendMatch('${esc(r.b.name)}', ${r.m.pct})">Send</button>
+      </div>`;
+  }
 }
 
 async function runMatch(){
@@ -4247,8 +4280,8 @@ async function runMatch(){
   renderMatches(true);
   if (btn) btn.disabled = false;
   const p = INVESTOR.properties[bbProp];
-  const strong = INVESTOR.buyers.filter(b => scoreMatch(b, p).pct >= 75).length;
-  toast(`✅ ${esc(p.addr)} scored against ${INVESTOR.buyers.length} buy-boxes · ${strong} strong fit${strong === 1 ? '' : 's'}`);
+  const strong = INVESTOR.buyers.filter(b => scoreMatch(b, p).pct >= 90).length;
+  toast(`✅ ${esc(p.addr)} scored against ${INVESTOR.buyers.length} buy-boxes · ${strong} recommended`);
 }
 
 function sendMatch(name, pct){
@@ -4322,13 +4355,15 @@ function renderAnalyzer(){
                 <td>${money(d.arv)}</td><td>${money(d.purchase)}</td><td>${money(d.repairs)}</td>
                 <td style="color:${u.net >= 0 ? 'var(--brand-success)' : 'var(--brand-warning)'};font-weight:800">${money(u.net)}</td>
                 <td>${u.roi.toFixed(1)}%</td>
-                <td><span class="pill ${u.within ? 'pill-ok' : 'pill-warn'}">${u.within ? 'Within' : 'Over'}</span></td>
+                <td><span class="pill ${u.within ? 'pill-ok' : 'pill-warn'}">${u.within ? 'Within' : 'Over MAO'}</span></td>
               </tr>`;
             }).join('')}
           </tbody>
         </table>
       </div>
     </div>
+
+    ${galleryHTML('analyzer')}
   </div>`;
   recalcDeal();
 }
