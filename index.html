@@ -1716,6 +1716,23 @@ const PRICING = {
     }
   ],
 
+  // Done-for-you ad + content service. No price shown, so it is deliberately NOT in
+  // tiers[] (the ROI calculator and compare table need a fixed monthly price).
+  creative: {
+    id:'creative', name:'Creative Growth', badge:'Done-For-You Marketing',
+    tagline:'We run your ads and content. You run the business.',
+    best:'Best for multi-location businesses that want a team driving new customers, not just bringing old ones back.',
+    features:[
+      'Google + Meta ads with retargeting',
+      'Structured content calendar',
+      '<b>Guaranteed commercial / animation</b>',
+      'Google Business Profile management',
+      'SEO optimization',
+      'Full-funnel ad strategy, multi-location',
+      'Personalized campaign development'
+    ]
+  },
+
   compare:[
     { label:'Customer list imported & cleaned',        r:'✓',       g:'✓',              a:'✓' },
     { label:'Email campaigns',                         r:'Unlimited', g:'Unlimited',    a:'Unlimited' },
@@ -2133,6 +2150,8 @@ details.calc pre{ background:var(--brand-bg); border-radius:var(--radius-sm); pa
   color:var(--on-brand); font-size:.7rem; font-weight:800; padding:.25rem .8rem; border-radius:999px; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; }
 .price-card.tier3{ border-color:var(--brand-primary); }
 .price-card.tier3 .price-badge{ background:var(--brand-primary); }
+.price-card.creative{ border-color:var(--brand-success); }
+.price-card.creative .price-badge{ background:var(--brand-success); }
 .price-amt{ font-size:clamp(2rem,5vw,2.7rem); font-weight:900; letter-spacing:-.035em; line-height:1; }
 .price-per{ font-size:.85rem; color:var(--brand-muted); font-weight:600; }
 .feat{ list-style:none; padding:0; margin:.4rem 0; display:flex; flex-direction:column; gap:.42rem; flex:1; }
@@ -4460,7 +4479,7 @@ function renderPricing(){
   $('panel-pricing').innerHTML = `
   <div class="wrap section">
     <div class="eyebrow">Pricing</div>
-    <h1>Three plans. No contract.</h1>
+    <h1>Four plans. No contract.</h1>
     <p class="lead">Every plan includes done-for-you setup: we import your list, build your workflows and configure everything. You are not buying software to learn — you are buying a machine we install.</p>
 
     <div class="row" style="margin:1.2rem 0;justify-content:center">
@@ -4488,6 +4507,18 @@ function renderPricing(){
           <button class="btn ${t.popular ? 'btn-accent' : 'btn-primary'}" onclick="go('start')">Start 14-Day Free Trial</button>
           <div class="center muted" style="font-size:.72rem">100% satisfaction guarantee · cancel any time</div>
         </div>`).join('')}
+      ${(c => `
+        <div class="price-card creative">
+          <div class="price-badge">${c.badge}</div>
+          <div>
+            <h3 style="margin-bottom:.1rem">${c.name}</h3>
+            <div class="muted" style="font-size:.85rem">${c.tagline}</div>
+          </div>
+          <ul class="feat">${c.features.map(f => `<li><span>${f}</span></li>`).join('')}</ul>
+          <div class="muted" style="font-size:.78rem;border-top:1px solid var(--brand-border);padding-top:.6rem">${c.best}</div>
+          <button class="btn btn-primary" onclick="go('start')">Book a Strategy Call</button>
+          <div class="center muted" style="font-size:.72rem">No obligation</div>
+        </div>`)(PRICING.creative)}
     </div>
 
     <div class="card" style="margin-top:1.2rem;background:var(--tint-accent);border-color:var(--brand-accent)">
