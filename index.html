@@ -1864,6 +1864,14 @@ a{ color:var(--brand-primary); }
 .tab .tnum{ display:inline-flex; align-items:center; justify-content:center; width:1.25rem; height:1.25rem;
   border-radius:50%; background:var(--tint-muted); font-size:.7rem; margin-right:.35rem; color:var(--brand-muted); }
 .tab[aria-selected="true"] .tnum{ background:var(--brand-primary); color:var(--on-brand); }
+/* 8+ tabs (Real Estate has 10): short labels + tighter spacing so they sit on one row
+   on desktop. Phones keep the swipe-scroll. */
+@media (min-width:900px){
+  .tabbar-inner.compact{ justify-content:space-between; }
+  .tabbar-inner.compact .tab{ padding:.85rem .3rem; font-size:.85rem; }
+  .tabbar-inner.compact .tab .tnum{ margin-right:.3rem; }
+}
+@media (min-width:900px) and (max-width:1250px){ .tabbar-inner.compact .tab .tnum{ display:none; } }
 .panel[hidden]{ display:none; }
 .panel{ animation:fadeUp .28s ease both; }
 @keyframes fadeUp{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
@@ -2476,9 +2484,9 @@ const STATE = {
 const TABS = [
   { id:'problem',   num:1, label:'The Problem' },
   { id:'how',       num:2, label:'How It Works' },
-  { id:'workflows', num:3, label:'Automated Workflows' },
-  { id:'ai',        num:4, label:'Your AI Assistant' },
-  { id:'dashboard', num:5, label:'Results Dashboard' },
+  { id:'workflows', num:3, label:'Automated Workflows', short:'Workflows' },
+  { id:'ai',        num:4, label:'Your AI Assistant', short:'AI Assistant' },
+  { id:'dashboard', num:5, label:'Results Dashboard', short:'Dashboard' },
   { id:'roi',       num:6, label:'ROI Calculator' },
   { id:'buybox',    num:7, label:'Buy-Box Matcher', only:['real-estate'] },
   { id:'analyzer',  num:8, label:'Deal Analyzer',   only:['real-estate'] },
@@ -2677,10 +2685,12 @@ function closePanel(){
 
 /* =============== TABS =============== */
 function renderTabbar(){
-  $('tabbar').innerHTML = visibleTabs().map((t, i) => `
+  const tabs = visibleTabs(), compact = tabs.length > 7;
+  $('tabbar').classList.toggle('compact', compact);
+  $('tabbar').innerHTML = tabs.map((t, i) => `
     <button class="tab" id="tab-${t.id}" role="tab" aria-selected="${STATE.tab === t.id}"
             aria-controls="panel-${t.id}" onclick="go('${t.id}')">
-      <span class="tnum">${i + 1}</span>${t.label}
+      <span class="tnum">${i + 1}</span>${compact && t.short ? t.short : t.label}
     </button>`).join('');
 }
 function go(id){
